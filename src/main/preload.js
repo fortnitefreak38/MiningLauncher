@@ -13,4 +13,7 @@ contextBridge.exposeInMainWorld('api', {
   onStatsUpdate: (cb) => {
     ipcRenderer.on('stats-update', (_, data) => cb(data));
   },
+  onPoolStatsUpdate: (cb) => {
+    ipcRenderer.on('pool-stats-update', (_, data) => cb(data));
+  },
 });

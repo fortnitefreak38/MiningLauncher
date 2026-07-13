@@ -98,6 +98,45 @@ function renderProfitRankings(ps) {
     `).join('');
 }
 
+// === Pool Stats ===
+function renderPoolStats(poolStats) {
+  const container = document.getElementById('pool-cards');
+  container.innerHTML = poolStats.map((p) => `
+    <div class="stat-card">
+      <div class="stat-label">${p.pool}</div>
+      <div style="font-size:13px;color:#888;margin:4px 0">${p.wallet}</div>
+      <div style="margin:12px 0">
+        <div style="font-size:22px;font-weight:700;color:#22c55e">${p.unpaid.toFixed(6)} XMR</div>
+        <div style="font-size:12px;color:#888">Unpaid Balance</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+        <div><span style="color:#888">Hashrate:</span> ${formatHashrate(p.hashrate)}</div>
+        <div><span style="color:#888">ø 24h:</span> ${formatHashrate(p.hashrateAvg)}</div>
+        <div><span style="color:#888">Worker:</span> ${p.workers}</div>
+        <div><span style="color:#888">Blocks:</span> ${p.blocksFound}</div>
+      </div>
+      <div style="font-size:11px;color:#555;margin-top:8px">
+        ${p.lastShare ? 'Letzter Share: ' + new Date(p.lastShare).toLocaleTimeString() : ''}
+      </div>
+    </div>
+  `).join('') || '<p style="color:#888">Keine aktiven Miner mit Pool-Stats.</p>';
+
+  const detail = document.getElementById('pool-detail');
+  if (poolStats.length > 0) {
+    const totalUnpaid = poolStats.reduce((s, p) => s + p.unpaid, 0);
+    const totalHash = poolStats.reduce((s, p) => s + p.hashrate, 0);
+    detail.innerHTML = `
+      <div class="stat-card" style="text-align:center">
+        <div class="stat-label">Gesamt (alle Pools)</div>
+        <div style="font-size:28px;font-weight:700;color:#22c55e">${totalUnpaid.toFixed(6)}</div>
+        <div style="color:#888;font-size:12px">Unpaid Balance</div>
+        <div style="font-size:18px;font-weight:600;color:#3b82f6;margin-top:8px">${formatHashrate(totalHash)}</div>
+        <div style="color:#888;font-size:12px">Gesamt-Hashrate</div>
+      </div>
+    `;
+  }
+}
+
 document.getElementById('force-profit-check')?.addEventListener('click', async () => {
   await window.api.forceProfitCheck();
   toast('Profit-Check gestartet');
@@ -241,6 +280,10 @@ document.getElementById('save-settings').addEventListener('click', async () => {
   renderMinerList(miners);
   updateSummary(miners);
   renderProfitRankings(ps);
+
+  window.api.onPoolStatsUpdate((poolStats) => {
+    renderPoolStats(poolStats);
+  });
 
   window.api.onStatsUpdate((data) => {
     const miners = data.miners || data;

@@ -4,6 +4,7 @@ const { MinerManager } = require('../miner/manager');
 const { ConfigManager } = require('./config');
 const { Notifier } = require('../miner/notifications');
 const { ProfitSwitcher } = require('../miner/profit-switcher');
+const { fetchAllPoolStats } = require('../miner/pool-stats');
 
 let mainWindow;
 let tray;
@@ -94,6 +95,15 @@ app.whenReady().then(async () => {
       });
     }
   }, 2000);
+
+  // Pool stats alle 60s aktualisieren
+  setInterval(async () => {
+    const s = minerManager.getStats();
+    const poolStats = await fetchAllPoolStats(s);
+    if (mainWindow && !mainWindow.isDestroyed() && poolStats.length > 0) {
+      mainWindow.webContents.send('pool-stats-update', poolStats);
+    }
+  }, 60_000);
 });
 
 app.on('before-quit', () => {

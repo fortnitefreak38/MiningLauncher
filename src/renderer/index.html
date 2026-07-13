@@ -11,6 +11,7 @@
     <button class="tab active" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="miners">Miner</button>
     <button class="tab" data-tab="profits">Profit</button>
+    <button class="tab" data-tab="pool">Pool</button>
     <button class="tab" data-tab="settings">Einstellungen</button>
   </nav>
 
@@ -45,6 +46,12 @@
         <button class="btn btn-danger" id="stop-all-btn">Alle Stoppen</button>
       </div>
       <div id="miner-cards"></div>
+    </section>
+
+    <!-- POOL STATS -->
+    <section id="pool" class="tab-content">
+      <div id="pool-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px"></div>
+      <div id="pool-detail" style="margin-top:20px"></div>
     </section>
 
     <!-- PROFIT SWITCHER -->

@@ -142,6 +142,69 @@ async function exportTax(format) {
   toast(`CSV exportiert: ${a.download}`);
 }
 
+// === KI-Prognose ===
+async function refreshAiPredictions() {
+  const predictions = await window.api.getAiPredictions();
+  const container = document.getElementById('ai-cards');
+  if (!predictions || predictions.length === 0) {
+    container.innerHTML = '<p style="color:#888">Noch nicht genug Daten. Die KI sammelt stündlich Daten – in 24h gibt es erste Prognosen.</p>';
+    return;
+  }
+
+  container.innerHTML = predictions.map((p) => {
+    const color = p.changePercent > 0 ? '#22c55e' : '#ef4444';
+    const arrow = p.changePercent > 0 ? '↗' : '↘';
+    const confidence = (p.confidence * 100).toFixed(0);
+    return `
+      <div class="stat-card" style="cursor:pointer" onclick="showAiChart('${p.coin}')">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="stat-label">${p.coin}</div>
+          <div style="font-size:12px;color:#888">${confidence}% Konfidenz</div>
+        </div>
+        <div style="font-size:28px;font-weight:700;color:${color};margin:8px 0">
+          ${arrow} ${p.changePercent > 0 ? '+' : ''}${p.changePercent.toFixed(1)}%
+        </div>
+        <div style="color:#888;font-size:13px">
+          ${p.currentProfit.toFixed(8)} BTC/Tag → ${p.predictedProfit.toFixed(8)} BTC/Tag
+        </div>
+        <div style="font-size:12px;color:#555;margin-top:4px">
+          Trend: ${p.trend === 'up' ? 'Steigend' : 'Fallend'} | ${p.dataPoints} Datenpunkte
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function showAiChart(coin) {
+  const history = await window.api.getAiHistory(coin, 48);
+  const chart = document.getElementById('ai-chart');
+  const bars = document.getElementById('ai-chart-bars');
+  chart.style.display = 'block';
+
+  if (!history || history.length < 2) {
+    bars.innerHTML = '<div style="color:#888">Nicht genug Daten für Chart.</div>';
+    return;
+  }
+
+  const profits = history.map((h) => h.profitability);
+  const max = Math.max(...profits);
+  const min = Math.min(...profits);
+  const range = max - min || 1;
+
+  bars.innerHTML = profits.map((p) => {
+    const height = ((p - min) / range) * 100;
+    const color = p > profits[profits.length - 1] ? '#22c55e' : '#ef4444';
+    return `<div style="flex:1;height:${height}%;background:${color};opacity:0.7;border-radius:2px 2px 0 0" title="${p.toFixed(8)}"></div>`;
+  }).join('');
+}
+
+// Auto-refresh on tab switch
+document.querySelectorAll('.tab').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    if (btn.dataset.tab === 'ai') refreshAiPredictions();
+  });
+});
+
 function renderPoolStats(poolStats) {
   const container = document.getElementById('pool-cards');
   container.innerHTML = poolStats.map((p) => `

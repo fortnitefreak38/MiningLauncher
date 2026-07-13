@@ -23,4 +23,6 @@ contextBridge.exposeInMainWorld('api', {
   exportTaxCSV: (format) => ipcRenderer.invoke('export-tax-csv', format),
   addTaxPayout: (coin, amount, txid, fee) => ipcRenderer.invoke('add-tax-payout', coin, amount, txid, fee),
   deleteTaxEntry: (index) => ipcRenderer.invoke('delete-tax-entry', index),
+  getAiPredictions: () => ipcRenderer.invoke('get-ai-predictions'),
+  getAiHistory: (coin, hours) => ipcRenderer.invoke('get-ai-history', coin, hours),
 });

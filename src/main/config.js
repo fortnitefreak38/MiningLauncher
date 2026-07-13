@@ -38,6 +38,10 @@ const DEFAULTS = {
     devWallet: '',
     devFeePercent: 1,
   },
+  aiPredictor: {
+    history: [],
+    lastLog: 0,
+  },
   taxTracker: {
     logs: [],
     payouts: [],

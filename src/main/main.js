@@ -7,6 +7,7 @@ const { ProfitSwitcher } = require('../miner/profit-switcher');
 const { fetchAllPoolStats } = require('../miner/pool-stats');
 const { fetchPrices, estimateSwap, generateSwapUrl, TARGET_COINS } = require('../miner/auto-exchange');
 const { TaxTracker } = require('../miner/tax-tracker');
+const { AiPredictor } = require('../miner/ai-predictor');
 
 let mainWindow;
 let tray;
@@ -15,6 +16,7 @@ let configManager;
 let notifier;
 let profitSwitcher;
 let taxTracker;
+let aiPredictor;
 let prevDevMode = {};
 
 function createWindow() {
@@ -64,6 +66,8 @@ app.whenReady().then(async () => {
   notifier = new Notifier(cfg.notifications);
   taxTracker = new TaxTracker(configManager);
   await taxTracker.load();
+  aiPredictor = new AiPredictor(configManager);
+  await aiPredictor.load();
 
   if (cfg.profitSwitcher?.enabled) {
     profitSwitcher = new ProfitSwitcher(cfg.profitSwitcher, (profile) => {
@@ -100,6 +104,11 @@ app.whenReady().then(async () => {
       });
     }
   }, 2000);
+
+  // AI Vorhersagen loggen (stündlich)
+  setInterval(async () => {
+    await aiPredictor.maybeLog();
+  }, 60_000); // checkt intern ob 1h vergangen ist
 
   // Pool stats alle 60s aktualisieren + Tax logging
   let lastTaxLogDay = '';
@@ -185,6 +194,18 @@ ipcMain.handle('add-tax-payout', (_, coin, amount, txid, fee) => {
   taxTracker.addPayout(coin, amount, txid, fee);
 });
 ipcMain.handle('delete-tax-entry', async (_, index) => {
+  const logs = taxTracker.getLogs();
+  if (index >= 0 && index < logs.length) {
+    logs.splice(index, 1);
+    await taxTracker.save();
+  }
+});
+ipcMain.handle('get-ai-predictions', () => {
+  const config = configManager.get();
+  const profitCoins = config.profitSwitcher?.profiles || [];
+  return aiPredictor.getPredictions(profitCoins);
+});
+ipcMain.handle('get-ai-history', (_, coin, hours) => aiPredictor.getHistory(coin, hours));
   const logs = taxTracker.getLogs();
   if (index >= 0 && index < logs.length) {
     logs.splice(index, 1);

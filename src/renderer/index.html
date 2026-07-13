@@ -11,6 +11,7 @@
     <button class="tab active" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="miners">Miner</button>
     <button class="tab" data-tab="profits">Profit</button>
+    <button class="tab" data-tab="ai">KI-Prognose</button>
     <button class="tab" data-tab="tax">Steuern</button>
     <button class="tab" data-tab="exchange">Exchange</button>
     <button class="tab" data-tab="pool">Pool</button>
@@ -48,6 +49,18 @@
         <button class="btn btn-danger" id="stop-all-btn">Alle Stoppen</button>
       </div>
       <div id="miner-cards"></div>
+    </section>
+
+    <!-- AI PROGNOSE -->
+    <section id="ai" class="tab-content">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-primary" onclick="refreshAiPredictions()">Prognose aktualisieren</button>
+      </div>
+      <div id="ai-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px"></div>
+      <div id="ai-chart" style="margin-top:20px;background:#1a1a20;border-radius:10px;padding:20px;display:none">
+        <div style="color:#888;font-size:13px;margin-bottom:8px">Profitabilitäts-Verlauf (letzte 48h)</div>
+        <div id="ai-chart-bars" style="display:flex;align-items:flex-end;gap:2px;height:150px"></div>
+      </div>
     </section>
 
     <!-- TAX -->

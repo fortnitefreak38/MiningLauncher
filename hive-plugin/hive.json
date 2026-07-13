@@ -1,0 +1,49 @@
+{
+  "name": "MiningLauncher",
+  "author": "MiningLauncher",
+  "version": "1.0.0",
+  "description": "Profit-Switching Miner (XMRig + Auto-Switch)",
+  "type": "custom",
+  "miner_name": "mining-launcher",
+  "args": {
+    "miner_type": "custom",
+    "algorithm": {
+      "type": "select",
+      "label": "Standard-Algorithmus",
+      "default": "randomx",
+      "options": [
+        {"value": "randomx", "label": "RandomX (XMR)"},
+        {"value": "kawpow", "label": "KawPow (RVN)"},
+        {"value": "ethash", "label": "Ethash (ETH)"},
+        {"value": "sha256", "label": "SHA-256 (BTC)"}
+      ]
+    },
+    "profit_switcher": {
+      "type": "select",
+      "label": "Profit Switcher",
+      "default": "1",
+      "options": [
+        {"value": "0", "label": "Aus (fest auf Standard-Algo)"},
+        {"value": "1", "label": "Ein (automatisch profitabelsten Coin minen)"}
+      ]
+    },
+    "dev_wallet": {
+      "type": "text",
+      "label": "Dev Fee Wallet (deine Wallet)",
+      "default": "",
+      "placeholder": "Deine Wallet für die 1% Dev Fee"
+    },
+    "dev_fee_percent": {
+      "type": "select",
+      "label": "Dev Fee %",
+      "default": "1",
+      "options": [
+        {"value": "0", "label": "0% (aus)"},
+        {"value": "0.5", "label": "0.5%"},
+        {"value": "1", "label": "1% (Standard)"},
+        {"value": "2", "label": "2%"},
+        {"value": "3", "label": "3%"}
+      ]
+    }
+  }
+}

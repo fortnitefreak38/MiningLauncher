@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MiningLauncher</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="tabs">
+    <button class="tab active" data-tab="dashboard">Dashboard</button>
+    <button class="tab" data-tab="miners">Miner</button>
+    <button class="tab" data-tab="profits">Profit</button>
+    <button class="tab" data-tab="settings">Einstellungen</button>
+  </nav>
+
+  <main>
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="tab-content active">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-label">Gesamt-Hashrate</span>
+          <span class="stat-value" id="total-hashrate">0 H/s</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Aktive Miner</span>
+          <span class="stat-value" id="active-miners">0 / 0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Accepted Shares</span>
+          <span class="stat-value" id="total-accepted">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Rejected Shares</span>
+          <span class="stat-value" id="total-rejected">0</span>
+        </div>
+      </div>
+      <div id="miner-list-dashboard"></div>
+    </section>
+
+    <!-- MINERS -->
+    <section id="miners" class="tab-content">
+      <div class="toolbar">
+        <button class="btn btn-success" id="start-all-btn">Alle Starten</button>
+        <button class="btn btn-danger" id="stop-all-btn">Alle Stoppen</button>
+      </div>
+      <div id="miner-cards"></div>
+    </section>
+
+    <!-- PROFIT SWITCHER -->
+    <section id="profits" class="tab-content">
+      <div class="toolbar">
+        <button class="btn btn-primary" id="force-profit-check">Jetzt prüfen</button>
+        <span id="profit-status-badge" style="margin-left:12px;font-size:13px;color:#888;align-self:center"></span>
+      </div>
+      <div id="profit-rankings"></div>
+      <table id="profit-table" style="width:100%;border-collapse:collapse;margin-top:12px">
+        <thead>
+          <tr style="color:#888;font-size:13px;text-align:left">
+            <th style="padding:8px">Coin</th>
+            <th style="padding:8px">Algo</th>
+            <th style="padding:8px">Profit (BTC/Tag)</th>
+            <th style="padding:8px">Status</th>
+          </tr>
+        </thead>
+        <tbody id="profit-tbody"></tbody>
+      </table>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="settings" class="tab-content">
+      <h2>Miner Konfiguration</h2>
+      <div id="miner-configs"></div>
+
+      <hr>
+
+      <h2>Profit Switcher</h2>
+      <fieldset>
+        <legend>Einstellungen</legend>
+        <label><input type="checkbox" id="ps-enabled"> Profit Switcher aktivieren</label>
+        <label>Prüf-Intervall (Minuten) <input type="number" id="ps-interval" min="5" value="30" style="width:100px"></label>
+        <label>Wechsel-Schwelle (%) <input type="number" id="ps-threshold" min="1" value="5" style="width:100px"> (nur wechseln wenn soviel profitabler)</label>
+      </fieldset>
+      <div id="ps-profiles"></div>
+
+      <hr>
+
+      <h2>Dev Fee</h2>
+      <fieldset>
+        <legend>Developer Fee (passives Einkommen)</legend>
+        <p style="color:#888;margin-bottom:12px;font-size:13px">Der Miner arbeitet 1% der Zeit für deine Wallet.</p>
+        <label>Deine Wallet-Adresse <input type="text" id="dev-wallet" placeholder="Deine Wallet für die Dev Fee"></label>
+        <label>Dev Fee % <input type="number" id="dev-percent" min="0" max="5" step="0.1" value="1" style="width:100px"></label>
+      </fieldset>
+
+      <hr>
+
+      <h2>Benachrichtigungen</h2>
+      <fieldset>
+        <legend>Telegram</legend>
+        <label>Bot Token <input type="text" id="tg-token" placeholder="123456:ABC-DEF"></label>
+        <label>Chat ID <input type="text" id="tg-chatid" placeholder="-100123456789"></label>
+        <label><input type="checkbox" id="tg-enabled"> Aktivieren</label>
+      </fieldset>
+      <fieldset>
+        <legend>Discord</legend>
+        <label>Webhook URL <input type="text" id="dc-webhook" placeholder="https://discord.com/api/webhooks/..."></label>
+        <label><input type="checkbox" id="dc-enabled"> Aktivieren</label>
+      </fieldset>
+
+      <button class="btn btn-primary" id="save-settings">Speichern</button>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

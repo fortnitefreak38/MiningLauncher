@@ -1,0 +1,16 @@
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('api', {
+  getConfig: () => ipcRenderer.invoke('get-config'),
+  saveConfig: (cfg) => ipcRenderer.invoke('save-config', cfg),
+  startMiner: (id) => ipcRenderer.invoke('start-miner', id),
+  stopMiner: (id) => ipcRenderer.invoke('stop-miner', id),
+  startAll: () => ipcRenderer.invoke('start-all'),
+  stopAll: () => ipcRenderer.invoke('stop-all'),
+  getStats: () => ipcRenderer.invoke('get-stats'),
+  getProfitStatus: () => ipcRenderer.invoke('get-profit-status'),
+  forceProfitCheck: () => ipcRenderer.invoke('force-profit-check'),
+  onStatsUpdate: (cb) => {
+    ipcRenderer.on('stats-update', (_, data) => cb(data));
+  },
+});

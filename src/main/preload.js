@@ -16,4 +16,7 @@ contextBridge.exposeInMainWorld('api', {
   onPoolStatsUpdate: (cb) => {
     ipcRenderer.on('pool-stats-update', (_, data) => cb(data));
   },
+  getExchangePrices: () => ipcRenderer.invoke('get-exchange-prices'),
+  estimateSwap: (fromAmount, fromCoin, toCoin) => ipcRenderer.invoke('estimate-swap', fromAmount, fromCoin, toCoin),
+  getTargetCoins: () => ipcRenderer.invoke('get-target-coins'),
 });

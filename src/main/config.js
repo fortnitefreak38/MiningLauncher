@@ -38,6 +38,13 @@ const DEFAULTS = {
     devWallet: '',
     devFeePercent: 1,
   },
+  autoExchange: {
+    enabled: false,
+    targetCoin: 'bitcoin',
+    targetWallet: '',
+    threshold: 0.1,       // min coins before swap suggestion
+    sourceCoin: 'monero', // what you're mining
+  },
   profitSwitcher: {
     enabled: false,
     intervalMinutes: 30,

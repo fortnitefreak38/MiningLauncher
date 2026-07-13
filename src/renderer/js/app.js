@@ -137,6 +137,64 @@ function renderPoolStats(poolStats) {
   }
 }
 
+// === Auto-Exchange ===
+function loadExchangeConfig(cfg) {
+  const ex = cfg.autoExchange || {};
+  document.getElementById('exchange-source').value = ex.sourceCoin || 'monero';
+  document.getElementById('exchange-threshold').value = ex.threshold || 0.1;
+  document.getElementById('exchange-wallet').value = ex.targetWallet || '';
+  document.getElementById('exchange-enabled').checked = ex.enabled || false;
+
+  const sel = document.getElementById('exchange-target');
+  sel.innerHTML = '';
+  window.api.getTargetCoins().then((coins) => {
+    coins.forEach((c) => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = `${c.symbol} – ${c.name}`;
+      if (c.id === (ex.targetCoin || 'bitcoin')) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+document.getElementById('exchange-estimate')?.addEventListener('click', async () => {
+  const fromAmount = parseFloat(document.getElementById('exchange-threshold').value) || 0.1;
+  const fromCoin = document.getElementById('exchange-source').value;
+  const toCoin = document.getElementById('exchange-target').value;
+  const result = await window.api.estimateSwap(fromAmount, fromCoin, toCoin);
+  const el = document.getElementById('exchange-result');
+  el.style.display = 'block';
+  if (result) {
+    const toSymbol = document.getElementById('exchange-target').selectedOptions[0]?.textContent || toCoin;
+    el.innerHTML = `
+      <div style="font-size:18px;font-weight:700;color:#22c55e">
+        ${fromAmount} → ~${result.estimatedAmount.toFixed(8)} ${toSymbol.split(' ')[0]}
+      </div>
+      <div style="color:#888;font-size:13px;margin-top:4px">
+        Kurs: ${result.rate.toFixed(8)} | Fee: ${(result.fee * 100).toFixed(2)}%
+        ${result.minAmount > 0 ? `| Min: ${result.minAmount}` : ''}
+      </div>
+    `;
+  } else {
+    el.innerHTML = '<div style="color:#ef4444">Schätzung fehlgeschlagen</div>';
+  }
+});
+
+document.getElementById('exchange-swap-link')?.addEventListener('click', async () => {
+  const fromAmount = parseFloat(document.getElementById('exchange-threshold').value) || 0.1;
+  const fromCoin = document.getElementById('exchange-source').value;
+  const toCoin = document.getElementById('exchange-target').value;
+  const refundAddress = document.getElementById('exchange-wallet').value;
+  const url = `https://changenow.io/exchange?from=${fromCoin}&to=${toCoin}&amount=${fromAmount}&address=${refundAddress || ''}`;
+  const el = document.getElementById('exchange-result');
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div style="margin-bottom:8px">Swap-Link (ChangeNOW) – klicken und bestätigen:</div>
+    <a href="${url}" target="_blank" style="color:#3b82f6;word-break:break-all">${url}</a>
+  `;
+});
+
 document.getElementById('force-profit-check')?.addEventListener('click', async () => {
   await window.api.forceProfitCheck();
   toast('Profit-Check gestartet');
@@ -255,7 +313,14 @@ document.getElementById('save-settings').addEventListener('click', async () => {
       devWallet: document.getElementById('dev-wallet').value,
       devFeePercent: parseFloat(document.getElementById('dev-percent').value) || 0,
     },
-    profitSwitcher: {
+    autoExchange: {
+        enabled: document.getElementById('exchange-enabled').checked,
+        targetCoin: document.getElementById('exchange-target').value,
+        targetWallet: document.getElementById('exchange-wallet').value,
+        threshold: parseFloat(document.getElementById('exchange-threshold').value) || 0.1,
+        sourceCoin: document.getElementById('exchange-source').value,
+      },
+      profitSwitcher: {
       enabled: document.getElementById('ps-enabled').checked,
       intervalMinutes: parseInt(document.getElementById('ps-interval').value) || 30,
       switchThreshold: parseInt(document.getElementById('ps-threshold').value) || 5,
@@ -273,6 +338,7 @@ document.getElementById('save-settings').addEventListener('click', async () => {
 (async function init() {
   config = await window.api.getConfig();
   loadSettings(config);
+  loadExchangeConfig(config);
 
   const data = await window.api.getStats();
   const miners = data.miners || data;

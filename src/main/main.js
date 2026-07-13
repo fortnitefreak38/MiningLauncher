@@ -5,6 +5,7 @@ const { ConfigManager } = require('./config');
 const { Notifier } = require('../miner/notifications');
 const { ProfitSwitcher } = require('../miner/profit-switcher');
 const { fetchAllPoolStats } = require('../miner/pool-stats');
+const { fetchPrices, estimateSwap, generateSwapUrl, TARGET_COINS } = require('../miner/auto-exchange');
 
 let mainWindow;
 let tray;
@@ -145,3 +146,6 @@ ipcMain.handle('get-profit-status', () => profitSwitcher ? profitSwitcher.getSta
 ipcMain.handle('force-profit-check', async () => {
   if (profitSwitcher) await profitSwitcher.check();
 });
+ipcMain.handle('get-exchange-prices', () => fetchPrices());
+ipcMain.handle('estimate-swap', (_, fromAmount, fromCoin, toCoin) => estimateSwap(fromAmount, fromCoin, toCoin));
+ipcMain.handle('get-target-coins', () => TARGET_COINS);

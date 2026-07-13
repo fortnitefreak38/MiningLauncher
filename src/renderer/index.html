@@ -11,6 +11,7 @@
     <button class="tab active" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="miners">Miner</button>
     <button class="tab" data-tab="profits">Profit</button>
+    <button class="tab" data-tab="exchange">Exchange</button>
     <button class="tab" data-tab="pool">Pool</button>
     <button class="tab" data-tab="settings">Einstellungen</button>
   </nav>
@@ -46,6 +47,38 @@
         <button class="btn btn-danger" id="stop-all-btn">Alle Stoppen</button>
       </div>
       <div id="miner-cards"></div>
+    </section>
+
+    <!-- EXCHANGE -->
+    <section id="exchange" class="tab-content">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+        <div class="stat-card">
+          <div class="stat-label">Deine Einnahmen (gestern)</div>
+          <div style="font-size:24px;font-weight:700;color:#22c55e" id="exchange-earnings">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Aktueller Kurs</div>
+          <div style="font-size:16px" id="exchange-rate">...</div>
+        </div>
+      </div>
+
+      <fieldset>
+        <legend>Auto-Exchange Konfiguration</legend>
+        <label>Du minest <select id="exchange-source">
+          <option value="monero">Monero (XMR)</option>
+          <option value="ravencoin">Ravencoin (RVN)</option>
+        </select></label>
+        <label>Ziel-Coin <select id="exchange-target"></select></label>
+        <label>Ziel-Wallet-Adresse <input type="text" id="exchange-wallet" placeholder="Deine BTC/ETH/USDT Wallet"></label>
+        <label>Auto-Swap ab (in mined Coin) <input type="number" id="exchange-threshold" step="0.01" min="0.01" style="width:120px"></label>
+        <label><input type="checkbox" id="exchange-enabled"> Auto-Exchange aktivieren</label>
+      </fieldset>
+
+      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" id="exchange-estimate">Swap schätzen</button>
+        <button class="btn btn-success" id="exchange-swap-link">Swap-Link öffnen</button>
+      </div>
+      <div id="exchange-result" style="margin-top:12px;padding:12px;background:#1a1a20;border-radius:8px;display:none"></div>
     </section>
 
     <!-- POOL STATS -->

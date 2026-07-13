@@ -19,4 +19,8 @@ contextBridge.exposeInMainWorld('api', {
   getExchangePrices: () => ipcRenderer.invoke('get-exchange-prices'),
   estimateSwap: (fromAmount, fromCoin, toCoin) => ipcRenderer.invoke('estimate-swap', fromAmount, fromCoin, toCoin),
   getTargetCoins: () => ipcRenderer.invoke('get-target-coins'),
+  getTaxLogs: () => ipcRenderer.invoke('get-tax-logs'),
+  exportTaxCSV: (format) => ipcRenderer.invoke('export-tax-csv', format),
+  addTaxPayout: (coin, amount, txid, fee) => ipcRenderer.invoke('add-tax-payout', coin, amount, txid, fee),
+  deleteTaxEntry: (index) => ipcRenderer.invoke('delete-tax-entry', index),
 });

@@ -38,6 +38,10 @@ const DEFAULTS = {
     devWallet: '',
     devFeePercent: 1,
   },
+  taxTracker: {
+    logs: [],
+    payouts: [],
+  },
   autoExchange: {
     enabled: false,
     targetCoin: 'bitcoin',

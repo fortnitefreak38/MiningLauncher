@@ -99,6 +99,49 @@ function renderProfitRankings(ps) {
 }
 
 // === Pool Stats ===
+// === Tax Tracker ===
+async function renderTaxLogs() {
+  const data = await window.api.getTaxLogs();
+  if (!data) return;
+
+  document.getElementById('tax-total-usd').textContent = '$' + (data.summary?.total?.usd || 0).toFixed(2);
+  document.getElementById('tax-total-eur').textContent = (data.summary?.total?.eur || 0).toFixed(2) + ' €';
+  document.getElementById('tax-days').textContent = data.summary?.days || 0;
+
+  const tbody = document.getElementById('tax-tbody');
+  tbody.innerHTML = (data.logs || []).map((l, i) => `
+    <tr style="border-bottom:1px solid #2a2a32">
+      <td style="padding:8px">${l.date}</td>
+      <td style="padding:8px;font-weight:600">${l.coin}</td>
+      <td style="padding:8px;color:#22c55e">${l.amount.toFixed(8)}</td>
+      <td style="padding:8px">$${l.priceUsd.toFixed(2)}</td>
+      <td style="padding:8px">$${l.valueUsd.toFixed(2)}</td>
+      <td style="padding:8px">${(l.valueEur || 0).toFixed(2)} €</td>
+      <td style="padding:8px">
+        <button class="btn btn-sm btn-danger" onclick="deleteTaxEntry(${i})" style="font-size:11px;padding:2px 8px">×</button>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="7" style="padding:16px;color:#888">Noch keine Einnahmen aufgezeichnet.</td></tr>';
+}
+
+async function deleteTaxEntry(index) {
+  await window.api.deleteTaxEntry(index);
+  renderTaxLogs();
+}
+
+async function exportTax(format) {
+  const csv = await window.api.exportTaxCSV(format);
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const names = { generic: 'tax-export.csv', cointracking: 'cointracking-import.csv', koinly: 'koinly-import.csv' };
+  a.href = url;
+  a.download = names[format] || 'export.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast(`CSV exportiert: ${a.download}`);
+}
+
 function renderPoolStats(poolStats) {
   const container = document.getElementById('pool-cards');
   container.innerHTML = poolStats.map((p) => `
@@ -339,6 +382,7 @@ document.getElementById('save-settings').addEventListener('click', async () => {
   config = await window.api.getConfig();
   loadSettings(config);
   loadExchangeConfig(config);
+  renderTaxLogs();
 
   const data = await window.api.getStats();
   const miners = data.miners || data;
@@ -349,6 +393,7 @@ document.getElementById('save-settings').addEventListener('click', async () => {
 
   window.api.onPoolStatsUpdate((poolStats) => {
     renderPoolStats(poolStats);
+    renderTaxLogs();
   });
 
   window.api.onStatsUpdate((data) => {

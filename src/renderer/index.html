@@ -11,6 +11,7 @@
     <button class="tab active" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="miners">Miner</button>
     <button class="tab" data-tab="profits">Profit</button>
+    <button class="tab" data-tab="tax">Steuern</button>
     <button class="tab" data-tab="exchange">Exchange</button>
     <button class="tab" data-tab="pool">Pool</button>
     <button class="tab" data-tab="settings">Einstellungen</button>
@@ -47,6 +48,45 @@
         <button class="btn btn-danger" id="stop-all-btn">Alle Stoppen</button>
       </div>
       <div id="miner-cards"></div>
+    </section>
+
+    <!-- TAX -->
+    <section id="tax" class="tab-content">
+      <div class="stats-grid" style="margin-bottom:16px">
+        <div class="stat-card">
+          <div class="stat-label">Gesamteinnahmen (USD)</div>
+          <div style="font-size:24px;font-weight:700;color:#22c55e" id="tax-total-usd">$0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Gesamteinnahmen (EUR)</div>
+          <div style="font-size:24px;font-weight:700;color:#22c55e" id="tax-total-eur">0.00 €</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Tage mit Einnahmen</div>
+          <div style="font-size:24px;font-weight:700;color:#3b82f6" id="tax-days">0</div>
+        </div>
+      </div>
+
+      <div class="toolbar" style="margin-bottom:12px">
+        <button class="btn btn-sm btn-primary" onclick="exportTax('generic')">CSV Export</button>
+        <button class="btn btn-sm btn-primary" onclick="exportTax('cointracking')">CoinTracking CSV</button>
+        <button class="btn btn-sm btn-primary" onclick="exportTax('koinly')">Koinly CSV</button>
+      </div>
+
+      <table style="width:100%;border-collapse:collapse" id="tax-table">
+        <thead>
+          <tr style="color:#888;font-size:12px;text-align:left">
+            <th style="padding:6px 8px">Datum</th>
+            <th style="padding:6px 8px">Coin</th>
+            <th style="padding:6px 8px">Menge</th>
+            <th style="padding:6px 8px">Kurs (USD)</th>
+            <th style="padding:6px 8px">Wert (USD)</th>
+            <th style="padding:6px 8px">Wert (EUR)</th>
+            <th style="padding:6px 8px"></th>
+          </tr>
+        </thead>
+        <tbody id="tax-tbody"></tbody>
+      </table>
     </section>
 
     <!-- EXCHANGE -->

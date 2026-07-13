@@ -6,6 +6,7 @@ const { Notifier } = require('../miner/notifications');
 const { ProfitSwitcher } = require('../miner/profit-switcher');
 const { fetchAllPoolStats } = require('../miner/pool-stats');
 const { fetchPrices, estimateSwap, generateSwapUrl, TARGET_COINS } = require('../miner/auto-exchange');
+const { TaxTracker } = require('../miner/tax-tracker');
 
 let mainWindow;
 let tray;
@@ -13,6 +14,7 @@ let minerManager;
 let configManager;
 let notifier;
 let profitSwitcher;
+let taxTracker;
 let prevDevMode = {};
 
 function createWindow() {
@@ -60,6 +62,8 @@ app.whenReady().then(async () => {
 
   minerManager = new MinerManager(configManager);
   notifier = new Notifier(cfg.notifications);
+  taxTracker = new TaxTracker(configManager);
+  await taxTracker.load();
 
   if (cfg.profitSwitcher?.enabled) {
     profitSwitcher = new ProfitSwitcher(cfg.profitSwitcher, (profile) => {
@@ -97,12 +101,34 @@ app.whenReady().then(async () => {
     }
   }, 2000);
 
-  // Pool stats alle 60s aktualisieren
+  // Pool stats alle 60s aktualisieren + Tax logging
+  let lastTaxLogDay = '';
   setInterval(async () => {
     const s = minerManager.getStats();
     const poolStats = await fetchAllPoolStats(s);
     if (mainWindow && !mainWindow.isDestroyed() && poolStats.length > 0) {
       mainWindow.webContents.send('pool-stats-update', poolStats);
+
+      // Tax: earnings from pool stats schätzen (nur 1x pro Tag)
+      const today = new Date().toISOString().split('T')[0];
+      if (today !== lastTaxLogDay && poolStats.length > 0) {
+        try {
+          const prices = await fetchPrices();
+          for (const p of poolStats) {
+            const coin = p.pool.includes('xmr') ? 'monero' : 'ravencoin';
+            const price = prices[coin]?.usd || 0;
+            if (p.hashrate > 0 && price > 0) {
+              // Schätze Tagesertrag: hashrate * 86400 / netzwerk-schwierigkeit * block_reward
+              await taxTracker.logDailyEarnings(
+                coin.toUpperCase(),
+                p.hashrate * 0.000001, // vereinfachte Schätzung
+                price
+              );
+            }
+          }
+          lastTaxLogDay = today;
+        } catch {}
+      }
     }
   }, 60_000);
 });
@@ -149,3 +175,19 @@ ipcMain.handle('force-profit-check', async () => {
 ipcMain.handle('get-exchange-prices', () => fetchPrices());
 ipcMain.handle('estimate-swap', (_, fromAmount, fromCoin, toCoin) => estimateSwap(fromAmount, fromCoin, toCoin));
 ipcMain.handle('get-target-coins', () => TARGET_COINS);
+ipcMain.handle('get-tax-logs', () => ({ logs: taxTracker.getLogs(), payouts: taxTracker.getPayouts(), summary: taxTracker.getSummary() }));
+ipcMain.handle('export-tax-csv', (_, format) => {
+  if (format === 'cointracking') return taxTracker.exportCoinTrackingCSV();
+  if (format === 'koinly') return taxTracker.exportKoinlyCSV();
+  return taxTracker.exportCSV();
+});
+ipcMain.handle('add-tax-payout', (_, coin, amount, txid, fee) => {
+  taxTracker.addPayout(coin, amount, txid, fee);
+});
+ipcMain.handle('delete-tax-entry', async (_, index) => {
+  const logs = taxTracker.getLogs();
+  if (index >= 0 && index < logs.length) {
+    logs.splice(index, 1);
+    await taxTracker.save();
+  }
+});
